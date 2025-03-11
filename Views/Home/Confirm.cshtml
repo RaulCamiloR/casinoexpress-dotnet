@@ -1,0 +1,215 @@
+@{
+    ViewData["Title"] = "Confirmar Código";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h1 class="text-center mb-4 text-white">Confirmar Código</h1>
+        
+        <div id="messageBox" class="alert d-none mb-3">
+        </div>
+        
+        <p class="text-center text-light mb-4">
+            Ingresa tu email y el código que hemos enviado a tu correo.
+        </p>
+        
+        <form id="confirmForm" onsubmit="handleConfirm(event)">
+            <div class="form-group mb-3">
+                <label for="email" class="text-light">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="input-focus-effect"></div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="code" class="text-light">Código de confirmación</label>
+                <input type="text" class="form-control" id="code" name="code" required>
+                <div class="input-focus-effect"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mb-3">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="button-text">Confirmar</span>
+            </button>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="#" class="text-primary text-decoration-none" onclick="handleResend(event)">
+                    <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true" style="display: none;"></span>
+                    <span>Reenviar código</span>
+                </a>
+                <a href="/" class="text-light text-decoration-none">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .text-light {
+        color: #e9ecef !important;
+    }
+    
+    .text-white {
+        color: #ffffff !important;
+    }
+    
+    .form-control {
+        color: #ffffff !important;
+    }
+    
+    .form-control::placeholder {
+        color: #6c757d !important;
+    }
+    
+    .text-primary {
+        color: #e65c00 !important;
+    }
+    
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    
+    .alert-success {
+        background-color: rgba(25, 135, 84, 0.2);
+        border: 1px solid #198754;
+        color: #ffffff;
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        color: #ffffff;
+    }
+    
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        margin-right: 0.5rem;
+    }
+    
+    .btn-loading .spinner-border {
+        display: inline-block !important;
+    }
+    
+    .btn-loading .button-text {
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+    
+    .link-loading .spinner-border {
+        display: inline-block !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function showMessage(message, isError = false) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+            messageBox.classList.add(isError ? 'alert-danger' : 'alert-success');
+            
+            // Animación de entrada
+            messageBox.style.opacity = '0';
+            setTimeout(() => {
+                messageBox.style.opacity = '1';
+            }, 10);
+
+            // Desaparecer después de 5 segundos
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                setTimeout(() => {
+                    messageBox.classList.add('d-none');
+                }, 300);
+            }, 5000);
+        }
+        
+        async function handleConfirm(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const formData = new FormData(form);
+            const email = formData.get('email');
+            const code = formData.get('code');
+            
+            // Mostrar estado de loading
+            submitButton.classList.add('btn-loading');
+            
+            try {
+                const response = await fetch('/Auth/ConfirmCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, code })
+                });
+                
+                const result = await response.json();
+                console.log('Respuesta del servidor:', result);
+                
+                if (result.ok) {
+                    showMessage('¡Cuenta confirmada exitosamente!');
+                    // Redirigir al login después de 3 segundos
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    showMessage(result.message || 'Error al confirmar la cuenta', true);
+                    submitButton.classList.remove('btn-loading');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Por favor, intenta nuevamente.', true);
+                submitButton.classList.remove('btn-loading');
+            }
+        }
+        
+        async function handleResend(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const resendLink = event.currentTarget;
+            const spinner = resendLink.querySelector('.spinner-border');
+            
+            if (!email) {
+                showMessage('Por favor, ingresa tu email antes de reenviar el código', true);
+                return;
+            }
+            
+            // Mostrar estado de loading
+            spinner.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/Auth/ResendCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const result = await response.json();
+                console.log('Respuesta del servidor:', result);
+                
+                if (result.ok) {
+                    showMessage('Se ha reenviado el código de verificación a tu email');
+                } else {
+                    showMessage(result.message || 'Error al reenviar el código', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Por favor, intenta nuevamente.', true);
+            } finally {
+                // Ocultar estado de loading
+                spinner.style.display = 'none';
+            }
+        }
+        
+        // Animación para los inputs
+        $('.form-control').focus(function() {
+            $(this).parent().find('label').css('color', '#e65c00');
+        }).blur(function() {
+            $(this).parent().find('label').css('color', '#e9ecef');
+        });
+    </script>
+} 

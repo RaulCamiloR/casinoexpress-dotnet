@@ -1,0 +1,271 @@
+﻿@{
+    ViewData["Title"] = "DEMO";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h1 class="text-center mb-4">DEMO</h1>
+        
+        <div id="messageBox" class="alert d-none mb-3">
+        </div>
+        
+        <form id="authForm" onsubmit="handleSubmit(event)">
+            <div class="form-group mb-3">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="input-focus-effect"></div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <div class="input-focus-effect"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mb-3">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="button-text">Sign in</span>
+            </button>
+            
+            <div class="text-center mb-2">
+                <p class="mb-1" id="toggleText">¿No tienes cuenta?</p>
+                <a href="#" class="text-primary text-decoration-none" id="toggleAuth">Registrate</a>
+            </div>
+            
+            <div class="text-center mb-3">
+                <p class="mb-1">¿Tienes un código? <a href="/Home/Confirm" class="text-primary text-decoration-none">Confirmar tu cuenta</a></p>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-muted mb-2">O continúa con Google</p>
+                <button type="button" onclick="handleGoogleLogin()" class="btn btn-light w-100 d-flex align-items-center justify-content-center gap-2">
+                    <span class="spinner-border spinner-border-sm text-dark" role="status" aria-hidden="true"></span>
+                    <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 20px;">
+                    <span class="google-text">Google</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showMessage(message, isError = false, includeLink = false) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = message;
+            if (includeLink) {
+                messageBox.innerHTML += ' <a href="/Home/Confirm" class="alert-link text-white text-decoration-underline">Click aquí para insertar el código</a>';
+            }
+            messageBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+            messageBox.classList.add(isError ? 'alert-danger' : 'alert-success');
+            
+            // Animación de entrada
+            messageBox.style.opacity = '0';
+            setTimeout(() => {
+                messageBox.style.opacity = '1';
+            }, 10);
+
+            if (!includeLink) {
+                // Solo desaparecer automáticamente si no es un mensaje con link
+                setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    setTimeout(() => {
+                        messageBox.classList.add('d-none');
+                    }, 300);
+                }, 5000);
+            }
+        }
+        
+        function hideMessage() {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.classList.add('d-none');
+        }
+        
+        $(document).ready(function() {
+            let isLoginMode = true;
+            
+            function animateText(element, newText) {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    element.textContent = newText;
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, 150);
+            }
+            
+            $('#toggleAuth').click(function(e) {
+                e.preventDefault();
+                isLoginMode = !isLoginMode;
+                hideMessage();
+                
+                const buttonText = document.querySelector('.button-text');
+                const toggleText = document.getElementById('toggleText');
+                const toggleAuth = document.getElementById('toggleAuth');
+                
+                if (isLoginMode) {
+                    animateText(buttonText, 'Sign in');
+                    animateText(toggleText, '¿No tienes cuenta?');
+                    animateText(toggleAuth, 'Registrate');
+                } else {
+                    animateText(buttonText, 'Register');
+                    animateText(toggleText, '¿Ya tienes una cuenta?');
+                    animateText(toggleAuth, 'Iniciar sesión');
+                }
+            });
+            
+            $('.form-control').focus(function() {
+                $(this).parent().find('label').css('color', '#e65c00');
+            }).blur(function() {
+                $(this).parent().find('label').css('color', '');
+            });
+        });
+        
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const isLoginMode = form.querySelector('.button-text').textContent === 'Sign in';
+            const formData = new FormData(form);
+            
+            // Mostrar estado de loading
+            submitButton.classList.add('btn-loading');
+            
+            try {
+                const endpoint = isLoginMode ? '/Auth/Login' : '/Auth/Register';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        password: formData.get('password')
+                    })
+                });
+                
+                const responseText = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('Respuesta del servidor:', result);
+                } catch (e) {
+                    console.error('Error al parsear la respuesta:', e);
+                    showMessage('Error en el servidor', true);
+                    submitButton.classList.remove('btn-loading');
+                    return;
+                }
+                
+                if (isLoginMode) {
+                    if (result.ok && result.id_token) {
+                        // Guardar tokens en localStorage
+                        localStorage.setItem('id_token', result.id_token);
+                        localStorage.setItem('access_token', result.access_token);
+                        localStorage.setItem('refresh_token', result.refresh_token);
+                        
+                        showMessage('Inicio de sesión exitoso');
+                        // Redirigir al dashboard después de 1 segundo
+                        setTimeout(() => {
+                            window.location.href = '/Home/Dashboard';
+                        }, 1000);
+                    } else {
+                        showMessage(result.message || 'Error en el inicio de sesión', true);
+                        submitButton.classList.remove('btn-loading');
+                    }
+                } else {
+                    if (result.ok) {
+                        const email = result.response.CodeDeliveryDetails.Destination;
+                        showMessage(`Se ha enviado un código de verificación a ${email}.`, false, true);
+                        form.reset();
+                        submitButton.classList.remove('btn-loading');
+                    } else {
+                        showMessage(result.message || 'Error en el registro', true);
+                        submitButton.classList.remove('btn-loading');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Por favor, intenta nuevamente.', true);
+                submitButton.classList.remove('btn-loading');
+            }
+        }
+
+        async function handleGoogleLogin() {
+            const googleButton = document.querySelector('.btn-light');
+            googleButton.classList.add('btn-loading');
+            
+            try {
+                const response = await fetch('/Auth/GoogleAuth');
+                const result = await response.json();
+                
+                if (result.ok && result.authUrl) {
+                    window.location.href = result.authUrl;
+                } else {
+                    showMessage('Error al iniciar sesión con Google', true);
+                    googleButton.classList.remove('btn-loading');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Por favor, intenta nuevamente.', true);
+                googleButton.classList.remove('btn-loading');
+            }
+        }
+    </script>
+}
+
+<style>
+    .button-text {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    #toggleText, #toggleAuth {
+        transition: all 0.3s ease;
+    }
+    
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    
+    .alert-success {
+        background-color: rgba(25, 135, 84, 0.2);
+        border: 1px solid #198754;
+        color: #ffffff;
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        color: #ffffff;
+    }
+    
+    .alert-link {
+        font-weight: 600;
+    }
+    
+    .alert-link:hover {
+        color: #ffffff !important;
+        opacity: 0.9;
+    }
+    
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        margin-right: 0.5rem;
+        display: none;
+    }
+    
+    .btn-loading .spinner-border {
+        display: inline-block;
+    }
+    
+    .btn-loading .button-text,
+    .btn-loading .google-text {
+        display: none;
+    }
+</style>

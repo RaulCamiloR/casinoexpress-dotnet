@@ -1,0 +1,102 @@
+body {
+    background-color: #1a1d21;
+    color: white;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-box {
+    background-color: #22252a;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    background-color: #2b2f35;
+    border: 2px solid transparent;
+    color: white;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #2b2f35;
+    color: white;
+    box-shadow: none;
+    border-color: #e65c00;
+    outline: none;
+}
+
+.input-focus-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #e65c00;
+    transition: width 0.3s ease;
+}
+
+.form-control:focus + .input-focus-effect {
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #e65c00;
+    border: none;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #cc5200;
+    transform: translateY(-1px);
+}
+
+.btn-light {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.btn-light:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus ~ label {
+    color: #e65c00;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+} 

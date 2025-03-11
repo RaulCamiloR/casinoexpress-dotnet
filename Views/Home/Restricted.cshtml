@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Acceso Restringido";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-danger">
+                <h2 class="text-white mb-4">Acceso Restringido</h2>
+                <p class="text-light mb-4">
+                    Lo sentimos, esta aplicación está restringida solo para usuarios con correo electrónico corporativo 
+                    <strong class="text-white">@@casinoexpress.cl</strong>
+                </p>
+                <a href="/" class="btn btn-primary">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        padding: 2rem;
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        background-color: #e65c00;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #cc5200;
+        transform: translateY(-1px);
+    }
+</style> 

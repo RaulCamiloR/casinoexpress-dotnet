@@ -1,0 +1,314 @@
+@{
+    ViewData["Title"] = "DEMO";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f1116;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: #1a1d24;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e5e7eb;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #2a2f3a;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #f4511e;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e64a19;
+        }
+
+        .additional-options {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .additional-options p {
+            margin: 0.5rem 0;
+            color: #9ca3af;
+        }
+
+        .additional-options a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .google-button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            background-color: white;
+            color: #333;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .google-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            text-align: center;
+            color: #9ca3af;
+            margin: 1rem 0;
+        }
+
+        /* Animaciones */
+        @@keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Transiciones suaves para todos los elementos */
+        button, a, input, .form-group, .additional-options {
+            transition: all 0.3s ease;
+        }
+
+        /* Efecto hover mejorado para el botón principal */
+        #submitButton {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #submitButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 81, 30, 0.3);
+        }
+
+        #submitButton:active {
+            transform: translateY(0);
+        }
+
+        /* Efecto hover mejorado para los enlaces */
+        .additional-options a {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .additional-options a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .additional-options a:hover:after {
+            width: 100%;
+        }
+
+        /* Efecto hover para el botón de Google */
+        .google-button {
+            transition: all 0.3s ease;
+        }
+
+        .google-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>DEMO</h1>
+        <form asp-controller="Auth" asp-action="Login" method="post" id="authForm">
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" id="submitButton">Sign in</button>
+        </form>
+        
+        <div class="additional-options">
+            <p><span id="accountText">¿No tienes cuenta? </span><a href="#" id="toggleAuth">Registrate</a></p>
+            <p>¿Tienes un código? <a href="@Url.Action("Confirm", "Auth")">Confirmar tu cuenta</a></p>
+            <div class="divider">O continúa con Google</div>
+            <button type="button" class="google-button" onclick="handleGoogleLogin()">
+                <img src="https://www.google.com/favicon.ico" alt="Google logo">
+                Google
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function handleGoogleLogin() {
+            window.location.href = '@Url.Action("Restriction", "Auth")';
+        }
+
+        const toggleAuth = document.getElementById('toggleAuth');
+        const submitButton = document.getElementById('submitButton');
+        const accountText = document.getElementById('accountText');
+        const authForm = document.getElementById('authForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        let isLoginMode = true;
+
+        // Manejar el envío del formulario
+        authForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                email: emailInput.value,
+                password: passwordInput.value,
+                type: isLoginMode ? 'Sign in' : 'Sign up'
+            };
+            
+            console.log(`Form submitted - ${formData.type}:`, {
+                email: formData.email,
+                password: formData.password
+            });
+
+            // Hacer el submit del formulario
+            const form = e.target;
+            const formAction = form.getAttribute('action');
+            fetch(formAction, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                }
+            });
+        });
+
+        function updateFormWithAnimation(isLogin) {
+            // Aplicar animación de salida
+            submitButton.classList.add('fade-out');
+            accountText.classList.add('fade-out');
+            toggleAuth.classList.add('fade-out');
+
+            setTimeout(() => {
+                if (isLogin) {
+                    submitButton.textContent = 'Sign in';
+                    toggleAuth.textContent = 'Registrate';
+                    accountText.textContent = '¿No tienes cuenta? ';
+                    authForm.setAttribute('action', '/Auth/Login');
+                } else {
+                    submitButton.textContent = 'Sign up';
+                    toggleAuth.textContent = 'Iniciar sesión';
+                    accountText.textContent = '¿Ya tienes cuenta? ';
+                    authForm.setAttribute('action', '/Auth/Register');
+                }
+
+                // Remover clase de animación de salida
+                submitButton.classList.remove('fade-out');
+                accountText.classList.remove('fade-out');
+                toggleAuth.classList.remove('fade-out');
+
+                // Aplicar animación de entrada
+                submitButton.classList.add('fade-in');
+                accountText.classList.add('fade-in');
+                toggleAuth.classList.add('fade-in');
+
+                // Limpiar clases de animación después de completarse
+                setTimeout(() => {
+                    submitButton.classList.remove('fade-in');
+                    accountText.classList.remove('fade-in');
+                    toggleAuth.classList.remove('fade-in');
+                }, 300);
+            }, 300);
+        }
+
+        toggleAuth.addEventListener('click', function(e) {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            updateFormWithAnimation(isLoginMode);
+        });
+    </script>
+</body>
+</html> 

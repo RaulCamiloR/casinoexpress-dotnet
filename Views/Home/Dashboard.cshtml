@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h1 class="text-center mb-4 text-white">Dashboard</h1>
+        
+        <p class="text-center text-light mb-4">Beautiful Content</p>
+        
+        <div class="text-center">
+            <button onclick="handleLogout()" class="btn btn-primary">Logout</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-light {
+        color: #e9ecef !important;
+    }
+    
+    .text-white {
+        color: #ffffff !important;
+    }
+    
+    .btn-primary {
+        background-color: #e65c00;
+        border: none;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #cc5200;
+        transform: translateY(-1px);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Verificar si el usuario está autenticado
+        document.addEventListener('DOMContentLoaded', function() {
+            const idToken = localStorage.getItem('id_token');
+            if (!idToken) {
+                window.location.href = '/';
+            }
+        });
+        
+        function handleLogout() {
+            // Limpiar tokens del localStorage
+            localStorage.removeItem('id_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            
+            // Redirigir al inicio
+            window.location.href = '/';
+        }
+    </script>
+} 

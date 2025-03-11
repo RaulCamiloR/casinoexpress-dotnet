@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "Autenticación con Google";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h1 class="text-center mb-4 text-white">Autenticación con Google</h1>
+        
+        <div class="alert alert-success mb-4">
+            <p class="mb-2 text-center">Autenticación exitosa con Google</p>
+            <p class="mb-0 text-center">Código de autenticación:</p>
+            <div class="code-box mt-2">
+                <code id="authCode">@ViewData["Code"]</code>
+                <button class="copy-btn" onclick="copyCode()">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="text-center mb-3">
+            <button onclick="processCode()" class="btn btn-success">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="button-text">Go</span>
+            </button>
+        </div>
+        
+        <div class="text-center">
+            <a href="/" class="btn btn-primary">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-white {
+        color: #ffffff !important;
+    }
+    
+    .btn-primary {
+        background-color: #e65c00;
+        border: none;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #cc5200;
+        transform: translateY(-1px);
+    }
+    
+    .btn-success {
+        background-color: #198754;
+        border: none;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .btn-success:hover {
+        background-color: #157347;
+        transform: translateY(-1px);
+    }
+    
+    .alert-success {
+        background-color: rgba(25, 135, 84, 0.2);
+        border: 1px solid #198754;
+        color: #ffffff;
+        padding: 1rem;
+        border-radius: 6px;
+    }
+    
+    .code-box {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        padding: 0.75rem;
+        position: relative;
+        overflow: hidden;
+        word-break: break-all;
+    }
+    
+    .code-box code {
+        color: #ffffff;
+        font-family: monospace;
+    }
+    
+    .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background-color: transparent;
+        border: none;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+        color: #e65c00;
+    }
+    
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        margin-right: 0.5rem;
+        display: none;
+    }
+    
+    .btn-loading .spinner-border {
+        display: inline-block;
+    }
+    
+    .btn-loading .button-text {
+        display: none;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        async function processCode() {
+            const code = document.getElementById('authCode').textContent;
+            const goButton = document.querySelector('.btn-success');
+            
+            // Mostrar estado de loading
+            goButton.classList.add('btn-loading');
+            
+            try {
+                const response = await fetch('/Callback/ProcessCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const result = await response.json();
+                console.log('Respuesta del servidor:', result);
+                
+                if (result.ok) {
+                    // Guardar tokens en localStorage
+                    localStorage.setItem('id_token', result.id_token);
+                    localStorage.setItem('access_token', result.access_token);
+                    localStorage.setItem('refresh_token', result.refresh_token);
+                    
+                    // Redirigir al dashboard
+                    window.location.href = '/Home/Dashboard';
+                } else {
+                    // Redirigir a restricted
+                    window.location.href = '/Home/Restricted';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión. Por favor, intenta nuevamente.');
+                goButton.classList.remove('btn-loading');
+            }
+        }
+        
+        function copyCode() {
+            const codeElement = document.getElementById('authCode');
+            const textToCopy = codeElement.textContent;
+            
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    alert('Código copiado al portapapeles');
+                })
+                .catch(err => {
+                    console.error('Error al copiar el código:', err);
+                });
+        }
+    </script>
+} 
